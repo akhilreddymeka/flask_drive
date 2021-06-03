@@ -1,5 +1,0 @@
-SECRET_KEY = '7b24428e-a7d1-45a2-be9b-401d2b4280fe'
-MONGO_URI = 'mongodb://akhil:Ft5i7b199410@cluster0-shard-00-00.s3js7.mongodb.net:27017,cluster0-shard-00-01.s3js7.mongodb.net:27017,cluster0-shard-00-02.s3js7.mongodb.net:27017/myFirstDatabase?ssl=true&replicaSet=atlas-m9rdp2-shard-0&authSource=admin&retryWrites=true&w=majority'
-AWS_KEY_ID = 'AKIAWJOTKSVXNC4MKIXY'
-AWS_SECRET_ACCESS = '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'
-UPLOAD_FOLDER = 'C:\\Akhil\\Workspace\\drive_env\\src\\uploads'
