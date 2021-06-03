@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Login</title>
+        <link rel="stylesheet" href="../static/Login.css">
+    </head>
+    <body>
+        <div class="container">
+            <div class="form-cont">
+                <form autocomplete="off" action="{{ url_for('login') }}" method="POST">
+                    <input type="text" name="email" placeholder="E-mail" required>
+                    <input type="password" name="password" placeholder="Password" required>
+                    <div class="frag">
+                        <button type="submit">Login</button>
+                        <a href="/signup">Signup</a>
+                    </div>
+                </form>
+            </div>
+
+            <p id="rfail" class="notif">Username or Password is Wrong.</p>
+            <p id="lsuc" class="notif">Logout Successful.</p>
+
+        </div>
+
+        <script>
+            {{ temp }}
+
+            if(lflag){
+                document.getElementById('lsuc').style.display = 'block';
+            }
+
+            if(pflag){
+                document.getElementById('rfail').style.display = 'block';
+            }
+        </script>
+    </body>
+</html>

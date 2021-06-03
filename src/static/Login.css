@@ -1,0 +1,73 @@
+* {
+    font-family: 'Noto Sans';
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-image: url('../static/background.jpg');
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100vh;
+    width: 30vw;
+    margin-left: 50px;
+    background-color: white;
+}
+
+.form-cont {
+    padding: 10px;
+}
+
+.form-cont form {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-cont form * {
+    margin-bottom: 10px;
+}
+
+input {
+    padding: 10px;
+    font-size: 20px;
+}
+
+.frag {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+button {
+    width: 10vw;
+    padding: 10px;
+    background-color: #3fd467;
+    border: 1px solid #309c4d;
+    color: white;
+    font-weight: bold;
+    font-size: 15px;
+}
+
+a {
+    margin-right: 5px;
+    font-size: 15px;
+    font-weight: bold;
+}
+
+.notif {
+    display: none;
+    text-align: center;
+    color: #309c4d;
+    font-size: 15px;
+}
+
+#rfail, #perr, #rerr, #uerr {
+    color: red;
+}

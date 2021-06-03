@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>SignUp</title>
+        <link rel="stylesheet" href="../static/login.css">
+    </head>
+    <body>
+        <div class="container">
+            <div class="form-cont">
+                <form autocomplete="off" action="{{ url_for('signup') }}" method="POST">
+                    <input id="uname" name="uname" type="text" placeholder="Username" required>
+                    <input id="email" name="email" type="email" placeholder="E-mail" required>
+                    <input id="no" name="no" type="tel" placeholder="Phone No" required>
+                    <input id="pass" name="pass" type="password" placeholder="Password" required>
+                    <input id="cpass" name="cpass" type="password" placeholder="Confirm Password" required>
+                    <div class="frag">
+                        <button type="submit">Signup</button>
+                        <a href="/login">Login</a>
+                    </div>
+                </form>
+            </div>
+
+            <p id="perr" class="notif">Both the Passwords should match.</p>
+            <p id="rerr" class="notif">Registration failed. Try Again.</p>
+            <p id="rsuc" class="notif">Registration Success. Now Login.</p>
+            <p id="uerr" class="notif">Email already exists.</p>
+
+        </div>
+
+        <script>
+
+            let signup_form = document.forms[0];
+
+            let perr = document.getElementById('perr');
+            let rerr = document.getElementById('rerr');
+            let rsuc = document.getElementById('rsuc');
+            let uerr = document.getElementById('uerr');
+
+            signup_form.addEventListener('submit', (event) => {
+                event.preventDefault();
+
+                perr.style.display = 'none';
+                rerr.style.display = 'none';
+                rsuc.style.display = 'none';
+                uerr.style.display = 'none';
+
+                let uname = document.getElementById('uname').value;
+                let email = document.getElementById('email').value;
+                let no = document.getElementById('no').value;
+                let pass =  document.getElementById('pass').value;
+                let cpass = document.getElementById('cpass').value;
+
+                if(pass != cpass)
+                    perr.style.display = 'block';
+                else {
+
+                    let data = {
+                        username: uname,
+                        email: email,
+                        tel: no,
+                        pass: pass
+                    };
+
+                    fetch('http://127.0.0.1:5000/signup', {
+                        method: 'POST',
+                        body: JSON.stringify(data),
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(res => {return res.json();})
+                    .then(val => {
+                        console.log(val);
+                        if(val.response == 'success')
+                            rsuc.style.display = 'block';
+
+                        if(val.response == 'failed')
+                            rerr.style.display = 'block';
+
+                        if(val.response == 'euser')
+                            uerr.style.display = 'block';
+                    })
+                    .catch(err => console.log(err))
+                    
+                }
+            })
+        </script>
+    </body>
+</html>

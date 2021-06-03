@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Home</title>
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="../static/page.css">
+    </head>
+    <body>
+        <div class="nav">
+            <span id="user"></span>
+            <div class="usage">
+                <progress id="bar" value="0" max="100"></progress> 
+                <span id="data"></span>
+            </div>
+            <ul>
+                <li><a id="plus" onclick="popup()" >+</li>
+                <li><a href="{{ url_for('logout') }}">Logout</a></li> 
+            </ul>
+        </div>
+
+        <div id="main" class="file-area">
+            <div class="box">
+                <span class="name">Test</span>
+                
+                <div class="details">
+                    <span class="disp">txt</span>
+                    <span class="size">2.5 MB</span>
+                </div>
+
+                <div class="btns">
+                    <a><img id="x" class="links" alt="download" src="../static/download.png"></a>
+                    <a><img id="y" class="links" alt="share" src="../static/share.png"></a>
+                    <a><img id="z" class="links" alt="trash" src="../static/trash.png"></a>
+                </div>
+            </div>
+        </div>
+
+        <div class="upload" id="popup">
+            <progress id="upload-progress" value="0" max="100"></progress> 
+
+            <div class="cont">
+                <input type="file" name="file-upload" id="file-upload">
+                <span id="status"></span>
+
+                <p id="ferr">Select a file</p> 
+                <p id="uerr">Error uploading file</p> 
+                <p id="serr">Free space not available</p>
+                <p id="fsuc">Upload Success</p>
+
+                <div class="bottom">
+                    <button class="btn green" id="upload" type="submit" onclick="upload_file()">Upload</button>
+                    <button class="btn red" id="cancel">Cancel</button>
+                    <button class="btn red" id="close">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+
+            // File Area
+
+            let main = document.getElementById('main');
+            let res = {};
+
+            render();
+
+            function render() {
+                removeAllChildNodes(main);
+
+                fetch('{{ url_for("data") }}')
+                    .then(res => res.json())
+                    .then(body => {
+                        draw(body)
+                    })
+                    .catch(err => console.log(err));
+            }
+
+            function draw(data) {
+                console.log(data)
+
+                // Setting Nav data
+                document.getElementById('user').innerHTML = `HI ${data.name}`;
+                document.getElementById('bar').value = data.value;
+                document.getElementById('data').innerHTML = `${data.storage_used}/${data.storage_limit}`;
+
+                // Displaying files available
+                for(let i=0; i<data.files.length; i++) {
+                    main.innerHTML += `<div class="box">    <span class="name">${data.files[i].name}</span>	<div class="extra">		<div class="details"><span class="disp">${data.files[i].ext}</span><span class="size">${data.files[i].size}</span></div>		<div class="btns">			<a href="/download/${data.files[i].key}" download><img id="${data.files[i].key}" alt="download" src="../static/download.png"></a>			<a><img id="${data.files[i].key}" class="links" alt="share" src="../static/share.png"></a>			<a><img id="${data.files[i].key}" class="links" alt="trash" src="../static/trash.png"></a>		</div>	</div></div>`;
+                }
+
+                let collection = document.getElementsByClassName('links');
+
+                for(let i=0; i<collection.length; i++) {
+                    collection[i].addEventListener('click', e => {
+                        let file_id = e.target.id;
+                        let action = e.target.alt;
+
+                        if(action == "trash") {
+                            fetch(`/delete/${file_id}`)
+                                .then(res => {
+                                    render();
+                                })
+                        }
+                    })
+                }
+            }
+
+            function removeAllChildNodes(parent) {
+                while(parent.firstChild) {
+                    parent.removeChild(parent.firstChild);
+                }
+            }
+
+            // Upload container
+
+            let add = document.getElementById('plus');
+            let input = document.getElementById('file-upload');
+            let progress = document.getElementById('upload-progress');
+            let status_disp = document.getElementById('status');
+            let upload = document.getElementById('upload');
+            let cancel = document.getElementById('cancel');
+            let close1 = document.getElementById('close');
+
+            function popup() {
+                reset();
+                document.getElementById('popup').style.display = 'block';
+            }
+
+            close1.addEventListener('click', (event) => {
+                event.preventDefault();
+                document.getElementById('popup').style.display = 'none';
+            })
+
+            function upload_file() {
+
+                reset();
+
+                if(!input.value) {
+                    document.getElementById('ferr').style.display = 'block';
+                    return;
+                }
+
+                let file = input.files[0];
+                
+                document.cookie = `filesize=${file.size}`;
+
+                input.disalbled = true;
+
+                progress.style.display = 'block';
+                status_disp.style.display = 'block';
+                cancel.style.display = 'block';
+                close1.style.display = 'none';
+
+                
+                let data = new FormData();
+                let request = new XMLHttpRequest();
+
+                request.responseType = "json";
+                data.append('file', file);
+
+                request.upload.addEventListener('progress', e => {
+                    let loaded = e.loaded;
+                    let total = e.total;
+
+                    let percent = (loaded/total)*100;
+
+                    progress.value = Math.floor(percent);
+                    status.innerText = `${Math.floor(percent)}%`;
+                })
+
+                request.addEventListener('load', e => {
+                    reset();
+                })
+
+                cancel.addEventListener('click', () => {
+                    request.abort();
+                    reset();
+                })
+
+                request.open("post", "{{ url_for('upload') }}");
+                request.responseType = 'text';
+                request.send(data);
+
+                request.onload = function() {
+                    if(request.readyState === request.DONE) {
+                        if(request.status === 200) {
+                            let res = request.responseText;
+
+                            if(res == 'upload_err') {
+                                reset();
+                                document.getElementById('uerr').style.display = 'block';
+                            }
+
+                            if(res == 'space_err') {
+                                reset();
+                                document.getElementById('serr').style.display = 'block';
+                            }
+
+                            if(res == 'success') {
+                                reset();
+                                document.getElementById('fsuc').style.display = 'block';
+                                render();
+                            }
+                        }
+                    }
+                }
+        
+            }
+
+            function reset() {
+                progress.style.display = 'none';
+                status_disp.style.display = 'none';
+                cancel.style.display = 'none';
+                close1.style.display = 'block';
+                document.getElementById('ferr').style.display = 'none';
+                document.getElementById('uerr').style.display = 'none';
+                document.getElementById('serr').style.display = 'none';
+                document.getElementById('fsuc').style.display = 'none';
+            }
+
+        </script>
+    </body>
+</html>
